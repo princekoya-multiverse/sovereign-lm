@@ -1,0 +1,44 @@
+---
+version: "2.0"
+services:
+  lm:
+    image: warriorworld/sovereign-lm:gpu-14b-20261101
+    env:
+      - SOVEREIGN_API_KEY=${SOVEREIGN_API_KEY}
+      - LLAMA_THREADS=8
+    expose:
+      - port: 8080
+        as: 80
+        to:
+          - global: true
+        http_options:
+          max_body_size: 10485760
+          read_timeout: 300000
+          send_timeout: 300000
+profiles:
+  compute:
+    lm:
+      resources:
+        cpu:
+          units: 4.0
+        memory:
+          size: 32Gi
+        gpu:
+          units: 1
+          attributes: []
+        storage:
+          size: 20Gi
+  placement:
+    gpu:
+      signedBy:
+        anyOf:
+          - "akash1365yvmc4s7awdyj3n2sav7xfx76adc6dnmlx63"
+      pricing:
+        lm:
+          denom: uakt
+          amount: 1800000  # ~$1.80/hr on A100 — on-demand only, close when done
+deployment:
+  lm:
+    gpu:
+      profile: lm
+      count: 1
